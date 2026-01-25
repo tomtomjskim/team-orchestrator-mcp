@@ -1,0 +1,86 @@
+# 데이터 파이프라인 워크플로우
+id: data-pipeline
+name: Data Pipeline Development
+description: |
+  데이터 소스 분석 → 파이프라인 설계 → 구현 → 테스트 → 배포
+
+stages:
+  - id: source-analysis
+    name: Source Analysis
+    description: 데이터 소스 및 스키마 분석
+    agent: explorer
+    type: Explore
+    task: |
+      데이터 소스 분석:
+      1. 데이터 소스 파악
+      2. 스키마 분석
+      3. 데이터 품질 확인
+    outputs:
+      - source-analysis-report
+
+  - id: pipeline-design
+    name: Pipeline Design
+    description: ETL/ELT 파이프라인 설계
+    agent: data-engineer
+    type: Plan
+    dependsOn:
+      - source-analysis
+    task: |
+      파이프라인 설계:
+      1. 데이터 흐름 정의
+      2. 변환 로직 설계
+      3. 스케줄링 계획
+    outputs:
+      - pipeline-design-doc
+
+  - id: implementation
+    name: Implementation
+    description: 파이프라인 코드 구현
+    agent: data-engineer
+    type: general-purpose
+    dependsOn:
+      - pipeline-design
+    task: |
+      파이프라인 구현:
+      설계 문서에 따라 ETL 코드 작성
+    outputs:
+      - pipeline-code
+
+  - id: testing
+    name: Testing
+    description: 파이프라인 테스트
+    agent: analyst
+    type: general-purpose
+    dependsOn:
+      - implementation
+    task: |
+      파이프라인 테스트:
+      1. 데이터 품질 검증
+      2. 성능 테스트
+      3. 결과 검증
+    outputs:
+      - test-report
+
+  - id: deployment
+    name: Deployment
+    description: 파이프라인 배포
+    agent: dba
+    type: Bash
+    dependsOn:
+      - testing
+    optional: true
+    task: |
+      파이프라인 배포:
+      1. 스케줄러 등록
+      2. 모니터링 설정
+    outputs:
+      - deployment-log
+
+checkpoints:
+  enabled: true
+  stages:
+    - pipeline-design
+    - testing
+
+onFailure:
+  strategy: pause

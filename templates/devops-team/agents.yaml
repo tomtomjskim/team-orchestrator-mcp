@@ -1,0 +1,115 @@
+# DevOps Team Agents
+version: "1.0"
+
+defaults:
+  outputFormat: markdown
+  contextInheritance: true
+
+agents:
+  pm:
+    name: "DevOps Lead"
+    type: orchestrator
+    description: |
+      DevOps 리드. 인프라 프로젝트 관리, 팀 조율.
+    prompt: prompts/pm.md
+    canSpawn:
+      - explorer
+      - infra-engineer
+      - cicd-engineer
+      - security-engineer
+      - sre
+
+  explorer:
+    name: "Infra Explorer"
+    type: Explore
+    description: |
+      인프라 탐색 전문가. 현재 인프라 상태 파악.
+    prompt: prompts/explorer.md
+    tools:
+      - Glob
+      - Grep
+      - Read
+      - Bash
+
+  infra-engineer:
+    name: "Infrastructure Engineer"
+    type: Bash
+    description: |
+      인프라 엔지니어. 인프라 프로비저닝, 구성 관리.
+    prompt: prompts/infra-engineer.md
+    expertise:
+      - Terraform
+      - Ansible
+      - Docker
+      - Kubernetes
+      - AWS/GCP/OCI
+    tools:
+      - Bash
+      - Read
+      - Edit
+      - Write
+    outputs:
+      - infra-code
+      - deployment-log
+
+  cicd-engineer:
+    name: "CI/CD Engineer"
+    type: general-purpose
+    description: |
+      CI/CD 엔지니어. 빌드, 테스트, 배포 파이프라인 구축.
+    prompt: prompts/cicd-engineer.md
+    expertise:
+      - GitHub Actions
+      - GitLab CI
+      - Jenkins
+      - ArgoCD
+    tools:
+      - Read
+      - Edit
+      - Write
+      - Glob
+      - Grep
+      - Bash
+    outputs:
+      - pipeline-config
+      - cicd-docs
+
+  security-engineer:
+    name: "Security Engineer"
+    type: general-purpose
+    description: |
+      보안 엔지니어. 보안 감사, 취약점 분석, 보안 정책.
+    prompt: prompts/security-engineer.md
+    expertise:
+      - Security Auditing
+      - OWASP
+      - Secrets Management
+      - Network Security
+    tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash
+    outputs:
+      - security-report
+      - remediation-plan
+
+  sre:
+    name: "Site Reliability Engineer"
+    type: Bash
+    description: |
+      SRE. 모니터링, 알림, 장애 대응, 성능 최적화.
+    prompt: prompts/sre.md
+    expertise:
+      - Prometheus
+      - Grafana
+      - ELK Stack
+      - Incident Response
+    tools:
+      - Bash
+      - Read
+      - Edit
+      - Write
+    outputs:
+      - monitoring-config
+      - incident-report

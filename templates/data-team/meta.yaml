@@ -1,0 +1,46 @@
+# Data Team Template
+id: data-team
+name: Data & ML Team
+description: |
+  데이터 엔지니어링 및 머신러닝 팀.
+  데이터 파이프라인, ML 모델, 분석 작업을 위한 구성.
+version: 1.0.0
+author: team-orchestrator
+license: MIT
+
+category: data
+tags:
+  - data
+  - ml
+  - analytics
+  - python
+  - etl
+
+agents:
+  - pm
+  - explorer
+  - data-engineer
+  - ml-engineer
+  - analyst
+  - dba
+
+defaultWorkflow: data-pipeline
+
+requirements:
+  tools:
+    - python >= 3.9
+    - pip
+  optional:
+    - docker
+    - jupyter
+    - dbt
+
+recommendedFor:
+  - ETL/ELT 파이프라인
+  - 머신러닝 모델 개발
+  - 데이터 분석
+  - 데이터 마이그레이션
+
+compatibility:
+  claudeCode: ">=1.0.0"
+  teamOrchestrator: ">=0.1.0"

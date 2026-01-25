@@ -1,0 +1,46 @@
+# DevOps Team Template
+id: devops-team
+name: DevOps & Infrastructure Team
+description: |
+  DevOps 및 인프라 관리 팀.
+  CI/CD, 인프라 프로비저닝, 보안, SRE 작업을 위한 구성.
+version: 1.0.0
+author: team-orchestrator
+license: MIT
+
+category: devops
+tags:
+  - devops
+  - infrastructure
+  - cicd
+  - kubernetes
+  - terraform
+
+agents:
+  - pm
+  - explorer
+  - infra-engineer
+  - cicd-engineer
+  - security-engineer
+  - sre
+
+defaultWorkflow: infra-provision
+
+requirements:
+  tools:
+    - docker
+    - git
+  optional:
+    - kubectl
+    - terraform
+    - ansible
+
+recommendedFor:
+  - 인프라 프로비저닝
+  - CI/CD 파이프라인 구축
+  - 보안 감사
+  - 장애 대응
+
+compatibility:
+  claudeCode: ">=1.0.0"
+  teamOrchestrator: ">=0.1.0"

@@ -3,6 +3,9 @@
  */
 
 import { TeamManager } from '../services/TeamManager.js';
+import { getWorkflowEngine, WorkflowEngine } from '../services/WorkflowEngine.js';
+import { getEventEmitter, EventEmitterService } from '../services/EventEmitter.js';
+import { WorkflowRun, OrchestrationEvent } from '../types/index.js';
 import {
   WorkflowRunInputSchema,
   WorkflowStatusInputSchema,
@@ -10,37 +13,21 @@ import {
   WorkflowAbortInputSchema,
 } from './schemas.js';
 
-// Workflow run storage (in-memory for now)
-const workflowRuns = new Map<string, {
-  runId: string;
-  workflowId: string;
-  task: string;
-  status: 'planning' | 'running' | 'paused' | 'completed' | 'failed' | 'aborted';
-  startTime: string;
-  endTime?: string;
-  currentStage?: string;
-  stages: Array<{
-    id: string;
-    name: string;
-    agent: string;
-    status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
-    startTime?: string;
-    endTime?: string;
-    output?: string;
-    error?: string;
-  }>;
-  checkpoints: Array<{
-    stageId: string;
-    timestamp: string;
-    data: any;
-  }>;
-  options: {
-    dryRun: boolean;
-    parallel: boolean;
-    checkpoints: boolean;
-    approvalRequired: boolean;
-  };
-}>();
+// Get service instances
+let workflowEngine: WorkflowEngine;
+let eventEmitter: EventEmitterService;
+
+function initServices() {
+  if (!workflowEngine) {
+    workflowEngine = getWorkflowEngine();
+    eventEmitter = getEventEmitter();
+
+    // Connect workflow events to event emitter
+    workflowEngine.on('event', (event: OrchestrationEvent) => {
+      eventEmitter.emitEvent(event).catch(console.error);
+    });
+  }
+}
 
 export const workflowToolDefinitions = [
   {
@@ -142,15 +129,14 @@ export const workflowToolDefinitions = [
   },
 ];
 
-function generateRunId(): string {
-  return `run-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
-}
-
 export async function handleWorkflowTool(
   toolName: string,
   args: Record<string, unknown>,
   teamManager: TeamManager
 ): Promise<any> {
+  // Initialize services on first call
+  initServices();
+
   switch (toolName) {
     case 'workflow_list': {
       const workflows = await teamManager.listWorkflows();
@@ -160,11 +146,15 @@ export async function handleWorkflowTool(
           name: w.name,
           description: w.description,
           stages: w.stages.map(s => ({
+            id: s.id,
             name: s.name,
             agent: s.agent,
             dependsOn: s.dependsOn || [],
+            parallel: s.parallel,
+            optional: s.optional,
           })),
           estimatedAgents: new Set(w.stages.map(s => s.agent)).size,
+          checkpoints: w.checkpoints,
         })),
       };
     }
@@ -187,7 +177,6 @@ export async function handleWorkflowTool(
         throw new Error(`Workflow '${input.workflow}' not found`);
       }
 
-      const runId = generateRunId();
       const options = {
         dryRun: input.options?.dryRun ?? false,
         parallel: input.options?.parallel ?? true,
@@ -195,51 +184,51 @@ export async function handleWorkflowTool(
         approvalRequired: input.options?.approvalRequired ?? false,
       };
 
-      // Create run record
-      const run = {
-        runId,
-        workflowId: workflow.id,
-        task: input.task,
-        status: options.dryRun ? 'planning' as const : 'running' as const,
-        startTime: new Date().toISOString(),
-        stages: workflow.stages.map(s => ({
-          id: s.id,
-          name: s.name,
-          agent: s.agent,
-          status: 'pending' as const,
-        })),
-        checkpoints: [],
-        options,
-      };
+      // Execute workflow using engine
+      const run = await workflowEngine.executeWorkflow(workflow, input.task, options);
 
-      workflowRuns.set(runId, run);
-
-      // Build execution plan
-      const plan = {
-        stages: workflow.stages.map(s => ({
-          id: s.id,
-          name: s.name,
-          agent: s.agent,
-          task: s.task || `Execute ${s.name} for: ${input.task}`,
-          dependsOn: s.dependsOn || [],
-        })),
-        estimatedSteps: workflow.stages.length,
-      };
-
-      return {
-        runId,
+      // Build response
+      const response: any = {
+        runId: run.runId,
         workflow: workflow.id,
         status: run.status,
-        plan,
-        message: options.dryRun
-          ? 'Dry run - execution plan generated but not started'
-          : 'Workflow started. Use workflow_status to monitor progress.',
+        startTime: run.startTime,
       };
+
+      if (options.dryRun) {
+        response.plan = {
+          stages: workflow.stages.map(s => ({
+            id: s.id,
+            name: s.name,
+            agent: s.agent,
+            task: s.task || `Execute ${s.name} for: ${input.task}`,
+            dependsOn: s.dependsOn || [],
+            parallel: s.parallel,
+            optional: s.optional,
+            condition: s.condition,
+          })),
+          estimatedSteps: workflow.stages.length,
+        };
+        response.message = 'Dry run - execution plan generated but not started';
+      } else {
+        response.stages = run.stages;
+        response.message = run.status === 'completed'
+          ? 'Workflow completed successfully'
+          : run.status === 'failed' || run.status === 'paused'
+            ? `Workflow ${run.status}. Use workflow_resume to continue.`
+            : 'Workflow started. Use workflow_status to monitor progress.';
+      }
+
+      if (run.result) {
+        response.result = run.result;
+      }
+
+      return response;
     }
 
     case 'workflow_status': {
       const input = WorkflowStatusInputSchema.parse(args);
-      const run = workflowRuns.get(input.runId);
+      const run = workflowEngine.getRunStatus(input.runId);
 
       if (!run) {
         throw new Error(`Workflow run '${input.runId}' not found`);
@@ -262,68 +251,57 @@ export async function handleWorkflowTool(
         stages: run.stages,
         startTime: run.startTime,
         endTime: run.endTime,
+        checkpoints: run.checkpoints,
         lastCheckpoint: run.checkpoints.length > 0
           ? run.checkpoints[run.checkpoints.length - 1]
           : undefined,
+        result: run.result,
       };
     }
 
     case 'workflow_resume': {
       const input = WorkflowResumeInputSchema.parse(args);
-      const run = workflowRuns.get(input.runId);
 
+      // Get workflow config
+      const run = workflowEngine.getRunStatus(input.runId);
       if (!run) {
         throw new Error(`Workflow run '${input.runId}' not found`);
       }
 
-      if (run.status !== 'paused' && run.status !== 'failed') {
-        throw new Error(`Workflow is not paused or failed (current status: ${run.status})`);
+      const workflows = await teamManager.listWorkflows();
+      const workflow = workflows.find(w => w.id === run.workflowId);
+      if (!workflow) {
+        throw new Error(`Workflow '${run.workflowId}' not found`);
       }
 
-      // Find resume point
-      let resumeFromIndex = 0;
-      if (input.fromCheckpoint) {
-        const checkpointIndex = run.stages.findIndex(s => s.id === input.fromCheckpoint);
-        if (checkpointIndex >= 0) {
-          resumeFromIndex = checkpointIndex;
-        }
-      } else {
-        // Resume from first non-completed stage
-        resumeFromIndex = run.stages.findIndex(s =>
-          s.status === 'pending' || s.status === 'failed'
-        );
-      }
-
-      run.status = 'running';
-      run.currentStage = run.stages[resumeFromIndex]?.id;
+      // Resume workflow
+      const resumedRun = await workflowEngine.resumeWorkflow(
+        input.runId,
+        workflow,
+        input.fromCheckpoint
+      );
 
       return {
-        runId: run.runId,
-        status: 'running',
-        resumedFrom: run.stages[resumeFromIndex]?.id || 'start',
-        message: 'Workflow resumed',
+        runId: resumedRun.runId,
+        status: resumedRun.status,
+        resumedFrom: input.fromCheckpoint || 'last-failure',
+        stages: resumedRun.stages,
+        message: resumedRun.status === 'completed'
+          ? 'Workflow completed successfully'
+          : 'Workflow resumed',
+        result: resumedRun.result,
       };
     }
 
     case 'workflow_abort': {
       const input = WorkflowAbortInputSchema.parse(args);
-      const run = workflowRuns.get(input.runId);
-
-      if (!run) {
-        throw new Error(`Workflow run '${input.runId}' not found`);
-      }
-
-      if (run.status === 'completed' || run.status === 'aborted') {
-        throw new Error(`Workflow already ${run.status}`);
-      }
-
-      run.status = 'aborted';
-      run.endTime = new Date().toISOString();
+      const run = workflowEngine.abortWorkflow(input.runId, input.reason);
 
       return {
         runId: run.runId,
         status: 'aborted',
         reason: input.reason || 'Aborted by user',
+        endTime: run.endTime,
         message: 'Workflow aborted',
       };
     }
@@ -333,14 +311,5 @@ export async function handleWorkflowTool(
   }
 }
 
-// Export for workflow engine integration
-export function getWorkflowRun(runId: string) {
-  return workflowRuns.get(runId);
-}
-
-export function updateWorkflowRun(runId: string, updates: Partial<typeof workflowRuns extends Map<string, infer V> ? V : never>) {
-  const run = workflowRuns.get(runId);
-  if (run) {
-    Object.assign(run, updates);
-  }
-}
+// Export workflow engine for external use
+export { getWorkflowEngine };

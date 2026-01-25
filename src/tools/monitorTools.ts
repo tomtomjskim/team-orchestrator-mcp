@@ -3,6 +3,7 @@
  */
 
 import { TeamManager } from '../services/TeamManager.js';
+import { getEventEmitter, EventEmitterService } from '../services/EventEmitter.js';
 import { MonitorConfig, MonitorType, OrchestrationEvent } from '../types/index.js';
 import {
   MonitorRegisterInputSchema,
@@ -10,17 +11,14 @@ import {
   MonitorGetEventsInputSchema,
 } from './schemas.js';
 
-// Event storage (in-memory)
-const events: OrchestrationEvent[] = [];
-const MAX_EVENTS = 10000;
+// Get event emitter instance
+let eventEmitter: EventEmitterService;
 
-// Monitor connections
-const monitors = new Map<string, {
-  id: string;
-  type: MonitorType;
-  config: MonitorConfig['config'];
-  status: 'connected' | 'pending' | 'error';
-}>();
+function initEventEmitter() {
+  if (!eventEmitter) {
+    eventEmitter = getEventEmitter();
+  }
+}
 
 export const monitorToolDefinitions = [
   {
@@ -124,6 +122,28 @@ export const monitorToolDefinitions = [
       },
     },
   },
+  {
+    name: 'monitor_list_channels',
+    description: 'List all registered monitoring channels',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'monitor_unregister',
+    description: 'Unregister a monitoring channel',
+    inputSchema: {
+      type: 'object',
+      required: ['channelId'],
+      properties: {
+        channelId: {
+          type: 'string',
+          description: 'Channel ID to unregister',
+        },
+      },
+    },
+  },
 ];
 
 function generateId(): string {
@@ -143,6 +163,9 @@ export async function handleMonitorTool(
   args: Record<string, unknown>,
   teamManager: TeamManager
 ): Promise<any> {
+  // Initialize event emitter on first call
+  initEventEmitter();
+
   switch (toolName) {
     case 'monitor_register': {
       const input = MonitorRegisterInputSchema.parse(args);
@@ -157,39 +180,21 @@ export async function handleMonitorTool(
         config: input.config,
       };
 
-      // Register with TeamManager
+      // Register with TeamManager for persistence
       await teamManager.registerMonitor(monitorConfig);
 
-      // Store in active monitors
-      monitors.set(monitorId, {
-        id: monitorId,
-        type: input.type,
-        config: input.config,
-        status: 'pending',
-      });
-
-      // Attempt connection test for SSE/webhook
-      let status: 'connected' | 'pending' | 'error' = 'pending';
-      if (input.type === 'sse' && input.config.endpoint) {
-        try {
-          // Simple connectivity check
-          const url = new URL(input.config.endpoint);
-          status = 'connected';
-        } catch {
-          status = 'error';
-        }
-      } else if (input.type === 'webhook' && input.config.url) {
-        status = 'pending'; // Will validate on first emit
-      } else if (input.type === 'file') {
-        status = 'connected'; // File is always available
-      }
-
-      monitors.get(monitorId)!.status = status;
+      // Register with EventEmitter for actual delivery
+      const channel = await eventEmitter.registerChannel(monitorConfig);
 
       return {
         success: true,
         monitorId,
-        status,
+        status: channel.status,
+        message: channel.status === 'connected'
+          ? 'Monitor registered and connected successfully'
+          : channel.status === 'error'
+            ? `Monitor registered but connection failed: ${channel.lastError}`
+            : 'Monitor registered, connection pending',
       };
     }
 
@@ -222,72 +227,70 @@ export async function handleMonitorTool(
         metadata: input.metadata,
       };
 
-      // Store event
-      events.push(event);
-      if (events.length > MAX_EVENTS) {
-        events.shift();
-      }
-
-      // Deliver to monitors
-      const deliveredTo: string[] = [];
-      for (const [id, monitor] of monitors) {
-        if (monitor.status === 'connected' || monitor.status === 'pending') {
-          // Check event filter
-          const eventFilter = monitor.config.events as string[] | undefined;
-          if (eventFilter && eventFilter.length > 0) {
-            if (!eventFilter.some(f => event.type.startsWith(f))) {
-              continue;
-            }
-          }
-
-          deliveredTo.push(id);
-          // Actual delivery would happen here via EventEmitter service
-        }
-      }
+      // Emit to all channels
+      const result = await eventEmitter.emitEvent(event);
 
       return {
         success: true,
         eventId: event.id,
-        deliveredTo,
+        deliveredTo: result.delivered,
+        failed: result.failed,
+        message: result.failed.length === 0
+          ? `Event delivered to ${result.delivered.length} channel(s)`
+          : `Event delivered to ${result.delivered.length} channel(s), failed on ${result.failed.length}`,
       };
     }
 
     case 'monitor_get_events': {
       const input = MonitorGetEventsInputSchema.parse(args);
 
-      let filtered = [...events];
+      // Get events from buffer
+      let events = eventEmitter.getBufferedEvents({
+        since: input.since,
+        types: input.types,
+        limit: input.limit || 100,
+      });
 
-      // Filter by run ID (check in payload)
+      // Filter by runId if specified
       if (input.runId) {
-        filtered = filtered.filter(e =>
+        events = events.filter(e =>
           e.payload?.runId === input.runId
         );
       }
 
-      // Filter by event types
-      if (input.types && input.types.length > 0) {
-        filtered = filtered.filter(e =>
-          input.types!.some(t => e.type.startsWith(t))
-        );
-      }
+      return {
+        events,
+        count: events.length,
+        hasMore: events.length >= (input.limit || 100),
+      };
+    }
 
-      // Filter by time
-      if (input.since) {
-        const sinceTime = new Date(input.since).getTime();
-        filtered = filtered.filter(e =>
-          new Date(e.timestamp).getTime() >= sinceTime
-        );
-      }
-
-      // Apply limit
-      const limit = input.limit || 100;
-      const hasMore = filtered.length > limit;
-      filtered = filtered.slice(-limit);
+    case 'monitor_list_channels': {
+      const channels = eventEmitter.getAllChannels();
 
       return {
-        events: filtered,
-        hasMore,
-        cursor: hasMore ? filtered[0]?.id : undefined,
+        channels: channels.map(ch => ({
+          id: ch.id,
+          type: ch.type,
+          enabled: ch.enabled,
+          status: ch.status,
+          eventCount: ch.eventCount,
+          lastError: ch.lastError,
+        })),
+        total: channels.length,
+        connected: channels.filter(ch => ch.status === 'connected').length,
+      };
+    }
+
+    case 'monitor_unregister': {
+      const { channelId } = args as { channelId: string };
+
+      await eventEmitter.unregisterChannel(channelId);
+
+      return {
+        success: true,
+        channelId,
+        message: 'Monitor channel unregistered',
       };
     }
 
@@ -296,14 +299,5 @@ export async function handleMonitorTool(
   }
 }
 
-// Export for EventEmitter integration
-export function recordEvent(event: OrchestrationEvent) {
-  events.push(event);
-  if (events.length > MAX_EVENTS) {
-    events.shift();
-  }
-}
-
-export function getActiveMonitors() {
-  return Array.from(monitors.values());
-}
+// Export event emitter for external use
+export { getEventEmitter };

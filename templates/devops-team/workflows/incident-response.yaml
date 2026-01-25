@@ -1,0 +1,71 @@
+# 장애 대응 워크플로우
+id: incident-response
+name: Incident Response
+description: |
+  감지 → 분석 → 대응 → 복구 → 포스트모템
+  긴급 장애 대응 프로세스
+
+stages:
+  - id: detection
+    name: Detection
+    description: 장애 상황 파악
+    agent: sre
+    type: Explore
+    task: |
+      장애 감지:
+      1. 증상 파악
+      2. 영향 범위 확인
+      3. 로그 분석
+    outputs:
+      - incident-report
+
+  - id: analysis
+    name: Root Cause Analysis
+    description: 근본 원인 분석
+    agent: explorer
+    type: Explore
+    dependsOn:
+      - detection
+    task: |
+      원인 분석:
+      1. 로그 분석
+      2. 메트릭 확인
+      3. 변경 이력 검토
+    outputs:
+      - rca-report
+
+  - id: mitigation
+    name: Mitigation
+    description: 긴급 대응
+    agent: sre
+    type: Bash
+    dependsOn:
+      - analysis
+    task: |
+      긴급 대응:
+      1. 임시 조치
+      2. 롤백 (필요시)
+      3. 서비스 복구
+    outputs:
+      - mitigation-log
+
+  - id: verification
+    name: Verification
+    description: 복구 확인
+    agent: sre
+    type: Bash
+    dependsOn:
+      - mitigation
+    task: |
+      복구 확인:
+      1. 서비스 상태 확인
+      2. 모니터링 확인
+      3. 사용자 영향 확인
+    outputs:
+      - verification-report
+
+checkpoints:
+  enabled: false
+
+onFailure:
+  strategy: continue

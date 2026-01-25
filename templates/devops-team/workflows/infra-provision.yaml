@@ -1,0 +1,94 @@
+# 인프라 프로비저닝 워크플로우
+id: infra-provision
+name: Infrastructure Provisioning
+description: |
+  분석 → 설계 → 프로비저닝 → 보안 검토 → 모니터링 설정
+
+stages:
+  - id: analysis
+    name: Current State Analysis
+    description: 현재 인프라 상태 분석
+    agent: explorer
+    type: Explore
+    task: |
+      인프라 분석:
+      1. 현재 리소스 파악
+      2. 설정 파일 검토
+      3. 의존성 확인
+    outputs:
+      - analysis-report
+
+  - id: design
+    name: Infrastructure Design
+    description: 인프라 아키텍처 설계
+    agent: infra-engineer
+    type: Plan
+    dependsOn:
+      - analysis
+    task: |
+      인프라 설계:
+      1. 아키텍처 결정
+      2. 리소스 계획
+      3. 비용 추정
+    outputs:
+      - design-doc
+
+  - id: provision
+    name: Provisioning
+    description: 인프라 프로비저닝
+    agent: infra-engineer
+    type: Bash
+    dependsOn:
+      - design
+    task: |
+      인프라 프로비저닝:
+      Terraform/Ansible로 리소스 생성
+    outputs:
+      - infra-code
+      - deployment-log
+
+  - id: security-review
+    name: Security Review
+    description: 보안 검토
+    agent: security-engineer
+    type: general-purpose
+    dependsOn:
+      - provision
+    task: |
+      보안 검토:
+      1. 보안 그룹 검토
+      2. IAM 정책 검토
+      3. 취약점 스캔
+    outputs:
+      - security-report
+    gate:
+      type: security
+      criteria:
+        - no-critical-vulnerabilities
+        - compliant-with-policy
+
+  - id: monitoring-setup
+    name: Monitoring Setup
+    description: 모니터링 설정
+    agent: sre
+    type: Bash
+    dependsOn:
+      - security-review
+    task: |
+      모니터링 설정:
+      1. 메트릭 수집
+      2. 알림 설정
+      3. 대시보드 생성
+    outputs:
+      - monitoring-config
+
+checkpoints:
+  enabled: true
+  stages:
+    - design
+    - provision
+
+onFailure:
+  strategy: pause
+  notify:
+    - webhook

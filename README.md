@@ -102,13 +102,12 @@ Claude (PM 역할):
 |--------|---------|------|
 | `web-dev` | PM, Explorer, Architect, Frontend, Backend, DevOps, QA, Documenter | 웹 서비스 개발 |
 | `general` | PM, Explorer, Developer, Tester | 범용 프로젝트 |
+| `data-team` | PM, Explorer, Data Engineer, ML Engineer, Analyst, DBA | 데이터/ML 프로젝트 |
+| `devops-team` | PM, Explorer, Infra Engineer, CI/CD Engineer, Security Engineer, SRE | 인프라 관리 |
 
 **Coming Soon:**
 - `design-team` - 디자인 프로젝트
-- `data-team` - 데이터/ML 프로젝트
-- `mes-team` - 제조 시스템
 - `content-team` - 콘텐츠 제작
-- `devops-team` - 인프라 관리
 
 ---
 
@@ -256,9 +255,10 @@ npm start
 - [x] 워크플로우 도구 (workflow_*)
 - [x] 모니터링 도구 (monitor_*)
 - [x] 기본 템플릿 (web-dev, general)
-- [ ] 워크플로우 엔진 고도화
-- [ ] 이벤트 발행 고도화
-- [ ] 추가 템플릿 (design, data, devops)
+- [x] 워크플로우 엔진 (DAG 기반 실행, 병렬 처리, 체크포인트)
+- [x] 이벤트 발행 (SSE, Webhook, File, OTLP)
+- [x] 추가 템플릿 (data-team, devops-team)
+- [ ] 추가 템플릿 (design, content)
 - [ ] 템플릿 레지스트리
 - [ ] npm 배포
 

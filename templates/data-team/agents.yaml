@@ -1,0 +1,120 @@
+# Data Team Agents
+version: "1.0"
+
+defaults:
+  outputFormat: markdown
+  contextInheritance: true
+
+agents:
+  pm:
+    name: "Data Project Manager"
+    type: orchestrator
+    description: |
+      데이터 프로젝트 매니저. 데이터 파이프라인 및 ML 프로젝트 관리.
+    prompt: prompts/pm.md
+    canSpawn:
+      - explorer
+      - data-engineer
+      - ml-engineer
+      - analyst
+      - dba
+
+  explorer:
+    name: "Data Explorer"
+    type: Explore
+    description: |
+      데이터 탐색 전문가. 데이터 소스 분석, 스키마 파악.
+    prompt: prompts/explorer.md
+    tools:
+      - Glob
+      - Grep
+      - Read
+      - Bash
+
+  data-engineer:
+    name: "Data Engineer"
+    type: general-purpose
+    description: |
+      데이터 엔지니어. ETL/ELT 파이프라인, 데이터 변환 담당.
+    prompt: prompts/data-engineer.md
+    expertise:
+      - Python
+      - SQL
+      - Pandas
+      - Apache Spark
+      - Airflow
+      - dbt
+    tools:
+      - Read
+      - Edit
+      - Write
+      - Glob
+      - Grep
+      - Bash
+    outputs:
+      - pipeline-code
+      - data-docs
+
+  ml-engineer:
+    name: "ML Engineer"
+    type: general-purpose
+    description: |
+      머신러닝 엔지니어. 모델 개발, 학습, 배포 담당.
+    prompt: prompts/ml-engineer.md
+    expertise:
+      - Python
+      - PyTorch
+      - TensorFlow
+      - scikit-learn
+      - MLflow
+    tools:
+      - Read
+      - Edit
+      - Write
+      - Glob
+      - Grep
+      - Bash
+    outputs:
+      - model-code
+      - training-report
+
+  analyst:
+    name: "Data Analyst"
+    type: general-purpose
+    description: |
+      데이터 분석가. 데이터 분석, 시각화, 인사이트 도출.
+    prompt: prompts/analyst.md
+    expertise:
+      - Python
+      - SQL
+      - Pandas
+      - Matplotlib
+      - Plotly
+    tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash
+    outputs:
+      - analysis-report
+      - visualization
+
+  dba:
+    name: "Database Administrator"
+    type: Bash
+    description: |
+      DBA. 데이터베이스 관리, 쿼리 최적화, 백업/복구.
+    prompt: prompts/dba.md
+    expertise:
+      - PostgreSQL
+      - MySQL
+      - MongoDB
+      - Redis
+    tools:
+      - Bash
+      - Read
+      - Edit
+      - Write
+    outputs:
+      - db-report
+      - migration-script
