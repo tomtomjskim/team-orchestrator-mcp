@@ -1,5 +1,5 @@
 {
-  "name": "@jsnwcorp/team-orchestrator-mcp",
+  "name": "team-orchestrator-mcp",
   "version": "0.1.0",
   "description": "Multi-agent team orchestration MCP server for Claude Code",
   "type": "module",
@@ -8,6 +8,12 @@
   "bin": {
     "team-orchestrator-mcp": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",

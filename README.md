@@ -44,13 +44,13 @@
   "mcpServers": {
     "team-orchestrator": {
       "command": "npx",
-      "args": ["-y", "@jsnwcorp/team-orchestrator-mcp"]
+      "args": ["-y", "team-orchestrator-mcp"]
     }
   }
 }
 ```
 
-또는 로컬 설치:
+또는 로컬 설치 (npm 배포 전):
 
 ```bash
 # Clone and build
