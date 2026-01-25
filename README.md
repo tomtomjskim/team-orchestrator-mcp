@@ -270,13 +270,7 @@ team-orchestrator-mcp/
 ## 문서
 
 ### Claude Code 셋업 가이드
-- [셋업 체크리스트](docs/setup-guide/00-setup-checklist.md)
-- [MCP 설정](docs/setup-guide/01-mcp-configuration.md)
-- [커맨드/스킬](docs/setup-guide/02-commands-skills.md)
-- [개발 파이프라인](docs/setup-guide/03-development-pipeline.md)
-- [문서화 규칙](docs/setup-guide/04-documentation-rules.md)
-- [에이전트 페르소나](docs/setup-guide/05-agent-personas.md)
-- [CLAUDE.md 템플릿](docs/setup-guide/07-claude-md-template.md)
+👉 **[claude-code-guide](https://github.com/tomtomjskim/claude-code-guide)** - 별도 레포지토리로 분리됨
 
 ### 설계 문서
 - [프로젝트 개요](docs/00-project-overview.md)
