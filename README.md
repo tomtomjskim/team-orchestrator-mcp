@@ -27,7 +27,8 @@
 
 | 기능 | 설명 |
 |------|------|
-| **팀 템플릿** | 웹개발, 디자인, 데이터, MES 등 다양한 팀 프리셋 |
+| **팀 템플릿** | 웹개발, 디자인, 데이터, DevOps, 콘텐츠 등 다양한 팀 프리셋 |
+| **템플릿 레지스트리** | 원격 템플릿 검색, 다운로드, 캐싱 |
 | **워크플로우 엔진** | DAG 기반 태스크 스케줄링, 병렬 실행 |
 | **표준 이벤트** | OpenTelemetry 호환, 다중 모니터링 연동 |
 | **확장 가능** | 커스텀 에이전트, 워크플로우, 템플릿 |
@@ -104,10 +105,8 @@ Claude (PM 역할):
 | `general` | PM, Explorer, Developer, Tester | 범용 프로젝트 |
 | `data-team` | PM, Explorer, Data Engineer, ML Engineer, Analyst, DBA | 데이터/ML 프로젝트 |
 | `devops-team` | PM, Explorer, Infra Engineer, CI/CD Engineer, Security Engineer, SRE | 인프라 관리 |
-
-**Coming Soon:**
-- `design-team` - 디자인 프로젝트
-- `content-team` - 콘텐츠 제작
+| `design-team` | PM, Explorer, UI Designer, UX Researcher, Design System, Prototyper | 디자인/UX 프로젝트 |
+| `content-team` | PM, Explorer, Strategist, Writer, Editor, SEO Specialist | 콘텐츠/마케팅 |
 
 ---
 
@@ -143,6 +142,22 @@ Claude (PM 역할):
 | `monitor_register` | 모니터링 엔드포인트 등록 |
 | `monitor_emit` | 커스텀 이벤트 발행 |
 | `monitor_get_events` | 이벤트 로그 조회 |
+| `monitor_list_channels` | 등록된 채널 목록 |
+| `monitor_unregister` | 모니터링 채널 해제 |
+
+### Template Registry
+| Tool | 설명 |
+|------|------|
+| `registry_search` | 템플릿 검색 |
+| `registry_info` | 템플릿 상세 정보 |
+| `registry_download` | 템플릿 다운로드 |
+| `registry_list` | 등록된 레지스트리 목록 |
+| `registry_add` | 커스텀 레지스트리 추가 |
+| `registry_remove` | 레지스트리 제거 |
+| `registry_cached` | 캐시된 템플릿 목록 |
+| `registry_clear_cache` | 캐시 삭제 |
+| `registry_categories` | 카테고리 목록 |
+| `registry_tags` | 태그 목록 |
 
 ---
 
@@ -165,6 +180,30 @@ Claude (PM 역할):
 | `pm-analyze` | PM의 태스크 분석 프롬프트 |
 | `pm-plan` | PM의 실행 계획 수립 프롬프트 |
 | `agent-context` | 에이전트 스폰 시 컨텍스트 프롬프트 |
+
+---
+
+## 템플릿 레지스트리
+
+### 템플릿 검색
+
+```
+사용자: "디자인 관련 템플릿 검색해줘"
+
+Claude: registry_search 도구로 검색합니다.
+→ design-team: 디자인 및 UX 팀
+```
+
+### 커스텀 레지스트리 추가
+
+```typescript
+// 사내 레지스트리 추가
+registry_add({
+  name: 'internal',
+  url: 'https://internal.company.com/templates/index.json',
+  priority: 5
+})
+```
 
 ---
 
@@ -203,15 +242,25 @@ team-orchestrator-mcp/
 │   ├── services/             # 핵심 서비스
 │   │   ├── TeamManager.ts    # 팀 관리
 │   │   ├── ConfigStore.ts    # 설정 저장소
-│   │   └── TemplateLoader.ts # 템플릿 로더
+│   │   ├── TemplateLoader.ts # 템플릿 로더
+│   │   ├── TemplateRegistry.ts # 템플릿 레지스트리
+│   │   ├── WorkflowEngine.ts # 워크플로우 엔진
+│   │   └── EventEmitter.ts   # 이벤트 발행
 │   └── tools/                # MCP 도구
 │       ├── teamTools.ts      # 팀 관련 도구
 │       ├── agentTools.ts     # 에이전트 관련 도구
 │       ├── workflowTools.ts  # 워크플로우 관련 도구
-│       └── monitorTools.ts   # 모니터링 관련 도구
+│       ├── monitorTools.ts   # 모니터링 관련 도구
+│       └── registryTools.ts  # 레지스트리 관련 도구
 ├── templates/                # 팀 템플릿
 │   ├── web-dev/              # 웹 개발팀
-│   └── general/              # 범용팀
+│   ├── general/              # 범용팀
+│   ├── data-team/            # 데이터/ML팀
+│   ├── devops-team/          # DevOps팀
+│   ├── design-team/          # 디자인팀
+│   └── content-team/         # 콘텐츠팀
+├── registry/                 # 템플릿 레지스트리 인덱스
+│   └── index.json
 ├── docs/                     # 설계 문서
 └── dist/                     # 빌드 결과물
 ```
@@ -257,9 +306,8 @@ npm start
 - [x] 기본 템플릿 (web-dev, general)
 - [x] 워크플로우 엔진 (DAG 기반 실행, 병렬 처리, 체크포인트)
 - [x] 이벤트 발행 (SSE, Webhook, File, OTLP)
-- [x] 추가 템플릿 (data-team, devops-team)
-- [ ] 추가 템플릿 (design, content)
-- [ ] 템플릿 레지스트리
+- [x] 추가 템플릿 (data-team, devops-team, design-team, content-team)
+- [x] 템플릿 레지스트리
 - [ ] npm 배포
 
 ---

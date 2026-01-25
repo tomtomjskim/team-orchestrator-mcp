@@ -1,0 +1,105 @@
+# Design Team Agents
+agents:
+  - role: pm
+    name: Project Manager
+    type: orchestrator
+    description: 디자인 프로젝트 총괄 및 에이전트 조율
+    enabled: true
+    promptPath: prompts/pm.md
+    expertise:
+      - 프로젝트 관리
+      - 디자인 프로세스
+      - 스테이크홀더 커뮤니케이션
+    canSpawn:
+      - explorer
+      - ui-designer
+      - ux-researcher
+      - design-system
+      - prototyper
+
+  - role: explorer
+    name: Design Explorer
+    type: Explore
+    description: 기존 디자인 에셋 및 코드 분석
+    enabled: true
+    promptPath: prompts/explorer.md
+    expertise:
+      - 디자인 파일 분석
+      - 컴포넌트 탐색
+      - 스타일 가이드 분석
+
+  - role: ui-designer
+    name: UI Designer
+    type: general-purpose
+    description: 사용자 인터페이스 디자인
+    enabled: true
+    promptPath: prompts/ui-designer.md
+    expertise:
+      - 비주얼 디자인
+      - 레이아웃 설계
+      - 컬러/타이포그래피
+      - 반응형 디자인
+    tools:
+      - Figma
+      - Sketch
+      - Adobe XD
+    outputs:
+      - UI 목업
+      - 스타일 가이드
+      - 디자인 스펙
+
+  - role: ux-researcher
+    name: UX Researcher
+    type: general-purpose
+    description: 사용자 경험 연구 및 분석
+    enabled: true
+    promptPath: prompts/ux-researcher.md
+    expertise:
+      - 사용자 리서치
+      - 페르소나 개발
+      - 사용성 테스트
+      - 여정 맵핑
+    outputs:
+      - 리서치 리포트
+      - 페르소나
+      - 여정 맵
+      - 사용성 테스트 결과
+
+  - role: design-system
+    name: Design System Engineer
+    type: general-purpose
+    description: 디자인 시스템 구축 및 관리
+    enabled: true
+    promptPath: prompts/design-system.md
+    expertise:
+      - 컴포넌트 라이브러리
+      - 디자인 토큰
+      - 문서화
+      - 일관성 관리
+    tools:
+      - Storybook
+      - Chromatic
+      - Style Dictionary
+    outputs:
+      - 컴포넌트 라이브러리
+      - 디자인 토큰
+      - 문서
+
+  - role: prototyper
+    name: Prototyper
+    type: general-purpose
+    description: 인터랙티브 프로토타입 제작
+    enabled: true
+    promptPath: prompts/prototyper.md
+    expertise:
+      - 인터랙션 디자인
+      - 애니메이션
+      - 프로토타이핑
+      - 마이크로인터랙션
+    tools:
+      - Figma Prototype
+      - Framer
+      - ProtoPie
+    outputs:
+      - 인터랙티브 프로토타입
+      - 애니메이션 스펙

@@ -1,0 +1,94 @@
+# Design Review Workflow
+id: design-review
+name: Design Review
+description: 디자인 리뷰 워크플로우 - 기존 디자인 분석 및 개선
+
+stages:
+  - id: audit
+    name: Design Audit
+    description: 현재 디자인 감사
+    agent: explorer
+    type: Explore
+    task: |
+      기존 디자인 분석:
+      1. UI 일관성 검토
+      2. 접근성 체크
+      3. 사용성 이슈 파악
+    outputs:
+      - audit_report
+
+  - id: ux-review
+    name: UX Review
+    description: UX 관점 리뷰
+    agent: ux-researcher
+    type: general-purpose
+    dependsOn:
+      - audit
+    task: |
+      UX 관점에서 분석:
+      1. 사용자 플로우 검토
+      2. 인지 부하 평가
+      3. 개선 기회 식별
+    outputs:
+      - ux_review_report
+
+  - id: ui-review
+    name: UI Review
+    description: UI 관점 리뷰
+    agent: ui-designer
+    type: general-purpose
+    dependsOn:
+      - audit
+    parallel: true
+    task: |
+      UI 관점에서 분석:
+      1. 비주얼 일관성
+      2. 브랜드 정합성
+      3. 레이아웃 효율성
+    outputs:
+      - ui_review_report
+
+  - id: system-review
+    name: Design System Review
+    description: 디자인 시스템 정합성 리뷰
+    agent: design-system
+    type: general-purpose
+    dependsOn:
+      - audit
+    parallel: true
+    task: |
+      디자인 시스템 관점에서:
+      1. 컴포넌트 재사용성
+      2. 토큰 활용도
+      3. 문서화 상태
+    outputs:
+      - system_review_report
+
+  - id: synthesize
+    name: Synthesize
+    description: 리뷰 결과 종합
+    agent: pm
+    type: orchestrator
+    dependsOn:
+      - ux-review
+      - ui-review
+      - system-review
+    task: |
+      모든 리뷰 결과 종합:
+      1. 우선순위 도출
+      2. 개선 로드맵 작성
+      3. 실행 계획 수립
+    outputs:
+      - improvement_roadmap
+      - action_plan
+
+checkpoints:
+  enabled: true
+  stages:
+    - audit
+    - synthesize
+
+onFailure:
+  strategy: continue
+  notify:
+    - pm

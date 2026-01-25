@@ -1,0 +1,131 @@
+# Design Sprint Workflow
+id: design-sprint
+name: Design Sprint
+description: 디자인 스프린트 워크플로우 - 리서치부터 프로토타입까지
+
+stages:
+  - id: understand
+    name: Understand
+    description: 문제 이해 및 리서치
+    agent: ux-researcher
+    type: general-purpose
+    task: |
+      주어진 요구사항을 분석하고:
+      1. 사용자 니즈 파악
+      2. 경쟁사 분석
+      3. 페르소나 정의
+      4. 사용자 여정 맵 작성
+    outputs:
+      - research_report
+      - personas
+      - journey_map
+
+  - id: explore
+    name: Explore Existing
+    description: 기존 디자인 에셋 탐색
+    agent: explorer
+    type: Explore
+    dependsOn:
+      - understand
+    task: |
+      기존 디자인 시스템과 에셋 분석:
+      1. 현재 컴포넌트 파악
+      2. 스타일 가이드 확인
+      3. 재사용 가능한 요소 식별
+    outputs:
+      - existing_components
+      - style_guide
+
+  - id: ideate
+    name: Ideate
+    description: 아이디어 도출 및 컨셉 설계
+    agent: ui-designer
+    type: general-purpose
+    dependsOn:
+      - understand
+      - explore
+    task: |
+      리서치 결과를 바탕으로:
+      1. 디자인 컨셉 도출
+      2. 와이어프레임 작성
+      3. 레이아웃 대안 탐색
+    outputs:
+      - design_concepts
+      - wireframes
+
+  - id: design
+    name: Design
+    description: UI 디자인 작업
+    agent: ui-designer
+    type: general-purpose
+    dependsOn:
+      - ideate
+    task: |
+      선정된 컨셉을 상세 디자인:
+      1. 하이파이 목업 제작
+      2. 컬러/타이포그래피 적용
+      3. 반응형 디자인
+      4. 디자인 스펙 문서화
+    outputs:
+      - ui_mockups
+      - design_specs
+
+  - id: prototype
+    name: Prototype
+    description: 인터랙티브 프로토타입 제작
+    agent: prototyper
+    type: general-purpose
+    dependsOn:
+      - design
+    task: |
+      디자인을 인터랙티브 프로토타입으로:
+      1. 인터랙션 설계
+      2. 애니메이션 추가
+      3. 사용자 플로우 구현
+    outputs:
+      - interactive_prototype
+
+  - id: validate
+    name: Validate
+    description: 디자인 검증
+    agent: ux-researcher
+    type: general-purpose
+    dependsOn:
+      - prototype
+    task: |
+      프로토타입 검증:
+      1. 사용성 테스트 계획
+      2. 피드백 수집
+      3. 개선점 도출
+    outputs:
+      - validation_report
+      - improvements
+
+  - id: document
+    name: Document
+    description: 디자인 시스템 문서화
+    agent: design-system
+    type: general-purpose
+    dependsOn:
+      - validate
+    task: |
+      최종 디자인 문서화:
+      1. 컴포넌트 문서화
+      2. 디자인 토큰 정의
+      3. 핸드오프 문서 작성
+    outputs:
+      - component_docs
+      - design_tokens
+      - handoff_docs
+
+checkpoints:
+  enabled: true
+  stages:
+    - ideate
+    - design
+    - prototype
+
+onFailure:
+  strategy: pause
+  notify:
+    - pm

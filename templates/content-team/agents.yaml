@@ -1,0 +1,97 @@
+# Content Team Agents
+agents:
+  - role: pm
+    name: Content Manager
+    type: orchestrator
+    description: 콘텐츠 프로젝트 총괄 및 에이전트 조율
+    enabled: true
+    promptPath: prompts/pm.md
+    expertise:
+      - 콘텐츠 전략
+      - 에디토리얼 캘린더
+      - 팀 조율
+    canSpawn:
+      - explorer
+      - strategist
+      - writer
+      - editor
+      - seo-specialist
+
+  - role: explorer
+    name: Content Explorer
+    type: Explore
+    description: 기존 콘텐츠 및 경쟁사 분석
+    enabled: true
+    promptPath: prompts/explorer.md
+    expertise:
+      - 콘텐츠 감사
+      - 경쟁사 분석
+      - 트렌드 파악
+
+  - role: strategist
+    name: Content Strategist
+    type: general-purpose
+    description: 콘텐츠 전략 수립
+    enabled: true
+    promptPath: prompts/strategist.md
+    expertise:
+      - 콘텐츠 전략
+      - 오디언스 분석
+      - 채널 전략
+      - 콘텐츠 캘린더
+    outputs:
+      - 콘텐츠 전략 문서
+      - 에디토리얼 캘린더
+      - 페르소나
+
+  - role: writer
+    name: Content Writer
+    type: general-purpose
+    description: 콘텐츠 작성
+    enabled: true
+    promptPath: prompts/writer.md
+    expertise:
+      - 카피라이팅
+      - 블로그 작성
+      - 기술 문서
+      - 스토리텔링
+    outputs:
+      - 블로그 포스트
+      - 마케팅 카피
+      - 기술 문서
+      - 소셜 미디어 콘텐츠
+
+  - role: editor
+    name: Editor
+    type: general-purpose
+    description: 콘텐츠 편집 및 품질 관리
+    enabled: true
+    promptPath: prompts/editor.md
+    expertise:
+      - 문법/맞춤법
+      - 스타일 가이드
+      - 팩트 체크
+      - 톤앤보이스
+    outputs:
+      - 편집된 콘텐츠
+      - 피드백 리포트
+
+  - role: seo-specialist
+    name: SEO Specialist
+    type: general-purpose
+    description: SEO 최적화
+    enabled: true
+    promptPath: prompts/seo-specialist.md
+    expertise:
+      - 키워드 리서치
+      - 온페이지 SEO
+      - 메타데이터 최적화
+      - 콘텐츠 최적화
+    tools:
+      - Ahrefs
+      - SEMrush
+      - Google Search Console
+    outputs:
+      - 키워드 리포트
+      - SEO 권장사항
+      - 메타데이터

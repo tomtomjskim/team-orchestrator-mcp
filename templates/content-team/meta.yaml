@@ -1,0 +1,45 @@
+# Content Team Template
+id: content-team
+name: Content & Marketing Team
+description: |
+  콘텐츠 및 마케팅 팀.
+  콘텐츠 전략, 작성, 편집, SEO 최적화 작업을 위한 구성.
+version: 1.0.0
+author: team-orchestrator
+license: MIT
+
+category: content
+tags:
+  - content
+  - marketing
+  - seo
+  - writing
+  - copywriting
+
+agents:
+  - pm
+  - explorer
+  - strategist
+  - writer
+  - editor
+  - seo-specialist
+
+defaultWorkflow: content-creation
+
+requirements:
+  tools:
+    - markdown
+  optional:
+    - grammarly
+    - hemingway
+    - ahrefs
+
+recommendedFor:
+  - 블로그 콘텐츠 제작
+  - 마케팅 카피 작성
+  - 기술 문서 작성
+  - SEO 최적화
+
+compatibility:
+  claudeCode: ">=1.0.0"
+  teamOrchestrator: ">=0.1.0"

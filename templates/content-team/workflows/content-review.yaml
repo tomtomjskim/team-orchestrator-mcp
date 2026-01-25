@@ -1,0 +1,97 @@
+# Content Review Workflow
+id: content-review
+name: Content Review
+description: 기존 콘텐츠 리뷰 및 업데이트 워크플로우
+
+stages:
+  - id: audit
+    name: Content Audit
+    description: 기존 콘텐츠 감사
+    agent: explorer
+    type: Explore
+    task: |
+      기존 콘텐츠 분석:
+      1. 콘텐츠 인벤토리 작성
+      2. 성과 데이터 수집
+      3. 품질 평가
+      4. 개선 필요 콘텐츠 식별
+    outputs:
+      - content_inventory
+      - audit_report
+
+  - id: seo-audit
+    name: SEO Audit
+    description: SEO 성과 분석
+    agent: seo-specialist
+    type: general-purpose
+    dependsOn:
+      - audit
+    task: |
+      SEO 관점 분석:
+      1. 키워드 순위 확인
+      2. 트래픽 분석
+      3. 백링크 현황
+      4. 기술적 SEO 이슈
+    outputs:
+      - seo_audit_report
+      - keyword_opportunities
+
+  - id: prioritize
+    name: Prioritize
+    description: 업데이트 우선순위 결정
+    agent: strategist
+    type: general-purpose
+    dependsOn:
+      - audit
+      - seo-audit
+    task: |
+      업데이트 우선순위 결정:
+      1. 영향도 평가
+      2. 노력 대비 효과 분석
+      3. 우선순위 매트릭스
+      4. 업데이트 로드맵
+    outputs:
+      - priority_matrix
+      - update_roadmap
+
+  - id: update
+    name: Update Content
+    description: 콘텐츠 업데이트
+    agent: writer
+    type: general-purpose
+    dependsOn:
+      - prioritize
+    task: |
+      우선순위에 따라 콘텐츠 업데이트:
+      1. 정보 업데이트
+      2. 새로운 섹션 추가
+      3. 오래된 정보 제거
+      4. 링크 업데이트
+    outputs:
+      - updated_content
+
+  - id: review
+    name: Review
+    description: 업데이트 검토
+    agent: editor
+    type: general-purpose
+    dependsOn:
+      - update
+    task: |
+      업데이트된 콘텐츠 검토:
+      1. 일관성 확인
+      2. 품질 검토
+      3. 정확성 확인
+    outputs:
+      - reviewed_content
+      - review_notes
+
+checkpoints:
+  enabled: true
+  stages:
+    - prioritize
+
+onFailure:
+  strategy: continue
+  notify:
+    - pm

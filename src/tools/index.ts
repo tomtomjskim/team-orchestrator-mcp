@@ -7,11 +7,13 @@ export * from './teamTools.js';
 export * from './agentTools.js';
 export * from './workflowTools.js';
 export * from './monitorTools.js';
+export * from './registryTools.js';
 
 import { teamToolDefinitions, handleTeamTool } from './teamTools.js';
 import { agentToolDefinitions, handleAgentTool } from './agentTools.js';
 import { workflowToolDefinitions, handleWorkflowTool } from './workflowTools.js';
 import { monitorToolDefinitions, handleMonitorTool } from './monitorTools.js';
+import { registryToolDefinitions, handleRegistryTool } from './registryTools.js';
 import { TeamManager } from '../services/TeamManager.js';
 
 // All tool definitions
@@ -20,6 +22,7 @@ export const allToolDefinitions = [
   ...agentToolDefinitions,
   ...workflowToolDefinitions,
   ...monitorToolDefinitions,
+  ...registryToolDefinitions,
 ];
 
 // Unified tool handler
@@ -46,6 +49,11 @@ export async function handleTool(
   // Monitor tools
   if (toolName.startsWith('monitor_')) {
     return handleMonitorTool(toolName, args, teamManager);
+  }
+
+  // Registry tools
+  if (toolName.startsWith('registry_')) {
+    return handleRegistryTool(toolName, args);
   }
 
   throw new Error(`Unknown tool: ${toolName}`);

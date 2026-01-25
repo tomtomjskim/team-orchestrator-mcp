@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-01-25
+
+### Added
+
+#### Additional Templates
+- **design-team**: Design & UX team (6 agents, 2 workflows)
+  - PM, Explorer, UI Designer, UX Researcher, Design System Engineer, Prototyper
+  - Workflows: design-sprint, design-review
+- **content-team**: Content & Marketing team (6 agents, 2 workflows)
+  - PM, Explorer, Content Strategist, Writer, Editor, SEO Specialist
+  - Workflows: content-creation, content-review
+
+#### Template Registry
+- Template registry service for remote template discovery
+- Support for multiple registries with priority ordering
+- Template search with filters (query, category, tags)
+- Template download and local caching
+- Cache management (list, clear)
+
+#### Registry MCP Tools
+- `registry_search` - Search templates across registries
+- `registry_info` - Get detailed template information
+- `registry_download` - Download template from registry
+- `registry_list` - List configured registries
+- `registry_add` - Add custom registry
+- `registry_remove` - Remove registry
+- `registry_cached` - List cached templates
+- `registry_clear_cache` - Clear template cache
+- `registry_categories` - List available categories
+- `registry_tags` - List available tags
+
+#### Registry Index
+- Official registry index at `/registry/index.json`
+- Contains all 6 templates with metadata
+
 ## [0.1.0] - 2025-01-25
 
 ### Added
@@ -78,7 +113,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Additional templates (design-team, content-team)
-- Template registry support
 - npm package publishing
-- Community contributions
+- Community template contributions
+- Template versioning and updates

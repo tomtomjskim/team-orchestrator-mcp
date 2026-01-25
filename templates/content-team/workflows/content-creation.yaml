@@ -1,0 +1,133 @@
+# Content Creation Workflow
+id: content-creation
+name: Content Creation
+description: 콘텐츠 제작 워크플로우 - 전략부터 퍼블리싱까지
+
+stages:
+  - id: research
+    name: Research
+    description: 주제 리서치 및 경쟁 분석
+    agent: explorer
+    type: Explore
+    task: |
+      콘텐츠 주제에 대해 리서치:
+      1. 기존 콘텐츠 분석
+      2. 경쟁사 콘텐츠 벤치마킹
+      3. 트렌드 파악
+      4. 갭 분석
+    outputs:
+      - research_report
+      - competitor_analysis
+
+  - id: strategy
+    name: Strategy
+    description: 콘텐츠 전략 수립
+    agent: strategist
+    type: general-purpose
+    dependsOn:
+      - research
+    task: |
+      리서치 결과 기반 전략 수립:
+      1. 타겟 오디언스 정의
+      2. 콘텐츠 앵글 결정
+      3. 핵심 메시지 도출
+      4. 콘텐츠 구조 설계
+    outputs:
+      - content_brief
+      - key_messages
+
+  - id: seo-research
+    name: SEO Research
+    description: 키워드 리서치
+    agent: seo-specialist
+    type: general-purpose
+    dependsOn:
+      - strategy
+    task: |
+      SEO 관점에서 키워드 분석:
+      1. 타겟 키워드 선정
+      2. 검색 의도 분석
+      3. 경쟁 키워드 분석
+      4. 롱테일 키워드 발굴
+    outputs:
+      - keyword_report
+      - seo_guidelines
+
+  - id: write
+    name: Write
+    description: 콘텐츠 작성
+    agent: writer
+    type: general-purpose
+    dependsOn:
+      - strategy
+      - seo-research
+    task: |
+      전략과 SEO 가이드라인에 따라 작성:
+      1. 아웃라인 작성
+      2. 초안 작성
+      3. SEO 키워드 반영
+      4. CTA 포함
+    outputs:
+      - draft_content
+
+  - id: edit
+    name: Edit
+    description: 콘텐츠 편집
+    agent: editor
+    type: general-purpose
+    dependsOn:
+      - write
+    task: |
+      콘텐츠 품질 검토 및 편집:
+      1. 문법/맞춤법 교정
+      2. 스타일 가이드 준수 확인
+      3. 가독성 개선
+      4. 팩트 체크
+    outputs:
+      - edited_content
+      - edit_feedback
+
+  - id: seo-optimize
+    name: SEO Optimize
+    description: SEO 최적화
+    agent: seo-specialist
+    type: general-purpose
+    dependsOn:
+      - edit
+    task: |
+      최종 SEO 최적화:
+      1. 메타 타이틀/디스크립션
+      2. 헤딩 구조 최적화
+      3. 내부 링크 추가
+      4. 이미지 ALT 태그
+    outputs:
+      - optimized_content
+      - meta_data
+
+  - id: finalize
+    name: Finalize
+    description: 최종 검토 및 완료
+    agent: pm
+    type: orchestrator
+    dependsOn:
+      - seo-optimize
+    task: |
+      최종 검토 및 퍼블리싱 준비:
+      1. 전체 품질 검토
+      2. 브랜드 일관성 확인
+      3. 퍼블리싱 체크리스트
+    outputs:
+      - final_content
+      - publishing_checklist
+
+checkpoints:
+  enabled: true
+  stages:
+    - strategy
+    - write
+    - edit
+
+onFailure:
+  strategy: pause
+  notify:
+    - pm

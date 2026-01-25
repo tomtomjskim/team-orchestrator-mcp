@@ -1,0 +1,45 @@
+# Design Team Template
+id: design-team
+name: Design & UX Team
+description: |
+  디자인 및 UX 팀.
+  UI/UX 디자인, 사용자 리서치, 디자인 시스템, 프로토타이핑 작업을 위한 구성.
+version: 1.0.0
+author: team-orchestrator
+license: MIT
+
+category: design
+tags:
+  - design
+  - ui
+  - ux
+  - figma
+  - prototype
+
+agents:
+  - pm
+  - explorer
+  - ui-designer
+  - ux-researcher
+  - design-system
+  - prototyper
+
+defaultWorkflow: design-sprint
+
+requirements:
+  tools:
+    - figma-cli (optional)
+    - storybook (optional)
+  optional:
+    - chromatic
+    - zeplin
+
+recommendedFor:
+  - UI/UX 디자인
+  - 디자인 시스템 구축
+  - 사용자 리서치
+  - 프로토타이핑
+
+compatibility:
+  claudeCode: ">=1.0.0"
+  teamOrchestrator: ">=0.1.0"

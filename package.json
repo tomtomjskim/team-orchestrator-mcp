@@ -1,6 +1,6 @@
 {
   "name": "team-orchestrator-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Multi-agent team orchestration MCP server for Claude Code",
   "type": "module",
   "main": "dist/index.js",

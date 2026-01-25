@@ -21,7 +21,7 @@ import { allToolDefinitions, handleTool } from './tools/index.js';
 
 // Server metadata
 const SERVER_NAME = 'team-orchestrator';
-const SERVER_VERSION = '0.1.0';
+const SERVER_VERSION = '0.2.0';
 
 async function main() {
   console.error(`[${SERVER_NAME}] Starting MCP server v${SERVER_VERSION}...`);
