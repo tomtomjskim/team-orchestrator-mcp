@@ -1,0 +1,45 @@
+# General Purpose Team Template
+id: general
+name: General Purpose Team
+description: |
+  범용 개발팀.
+  탐색, 계획, 개발, 테스트 역할의 기본 구성.
+  다양한 프로젝트 유형에 적용 가능.
+version: 1.0.0
+author: team-orchestrator
+license: MIT
+
+# 분류
+category: custom
+tags:
+  - general
+  - basic
+  - starter
+
+# 에이전트 목록
+agents:
+  - pm
+  - explorer
+  - developer
+  - tester
+
+# 기본 워크플로우
+defaultWorkflow: basic
+
+# 사용 요건
+requirements:
+  tools: []
+  optional:
+    - git
+
+# 권장 프로젝트 유형
+recommendedFor:
+  - 소규모 프로젝트
+  - 프로토타입
+  - 스크립트 작성
+  - 유틸리티 개발
+
+# 호환성
+compatibility:
+  claudeCode: ">=1.0.0"
+  teamOrchestrator: ">=0.1.0"

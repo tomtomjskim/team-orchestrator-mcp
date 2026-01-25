@@ -1,0 +1,53 @@
+# 빠른 수정 워크플로우
+id: quick-fix
+name: Quick Fix
+description: |
+  분석 → 수정 → 검증
+  긴급 버그 수정용 간소화 프로세스
+
+stages:
+  - id: investigate
+    name: Investigate
+    description: 버그 원인 조사
+    agent: explorer
+    type: Explore
+    task: |
+      버그 원인 조사:
+      1. 관련 코드 탐색
+      2. 오류 패턴 분석
+      3. 원인 파악
+    outputs:
+      - investigation-report
+
+  - id: fix
+    name: Fix
+    description: 버그 수정
+    agent: backend
+    type: general-purpose
+    dependsOn:
+      - investigate
+    task: |
+      버그 수정:
+      조사 결과를 바탕으로 코드 수정
+    outputs:
+      - source-code
+
+  - id: verify
+    name: Verify
+    description: 수정 검증
+    agent: qa
+    type: general-purpose
+    dependsOn:
+      - fix
+    task: |
+      수정 검증:
+      1. 버그 재현 불가 확인
+      2. 회귀 테스트
+    outputs:
+      - verification-report
+
+checkpoints:
+  enabled: false
+
+onFailure:
+  strategy: continue

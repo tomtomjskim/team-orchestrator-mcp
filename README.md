@@ -50,14 +50,34 @@
 }
 ```
 
+또는 로컬 설치:
+
+```bash
+# Clone and build
+git clone https://github.com/tomtomjskim/team-orchestrator-mcp.git
+cd team-orchestrator-mcp
+npm install
+npm run build
+
+# MCP 설정에 추가
+{
+  "mcpServers": {
+    "team-orchestrator": {
+      "command": "node",
+      "args": ["/path/to/team-orchestrator-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
 ### 2. 팀 초기화
 
 ```
-사용자: "이 프로젝트에 web-dev-team 으로 팀 설정해줘"
+사용자: "이 프로젝트에 web-dev 팀 템플릿으로 설정해줘"
 
 Claude: team_init 도구를 사용하여 팀을 초기화합니다.
 → .claude/team/ 디렉토리에 설정 생성
-→ PM, Frontend, Backend, DevOps, QA, Documenter 에이전트 준비
+→ PM, Explorer, Architect, Frontend, Backend, DevOps, QA, Documenter 에이전트 준비
 ```
 
 ### 3. PM 모드로 작업
@@ -68,7 +88,7 @@ Claude: team_init 도구를 사용하여 팀을 초기화합니다.
 Claude (PM 역할):
 1. 요청 분석 및 태스크 분해
 2. Explorer로 코드 분석
-3. 설계 수립
+3. Architect로 설계 수립
 4. Frontend/Backend 에이전트 병렬 스폰
 5. QA 검증
 6. 결과 통합 및 보고
@@ -80,32 +100,72 @@ Claude (PM 역할):
 
 | 템플릿 | 에이전트 | 용도 |
 |--------|---------|------|
-| `web-dev-team` | PM, Frontend, Backend, DevOps, QA, Documenter | 웹 서비스 개발 |
-| `design-team` | PM, Art Director, UI/UX, Motion | 디자인 프로젝트 |
-| `data-team` | PM, Data Engineer, ML Engineer, Analyst | 데이터/ML 프로젝트 |
-| `mes-team` | PM, PLC Dev, SCADA Dev, DBA | 제조 시스템 |
-| `content-team` | PM, Writer, Editor, SEO | 콘텐츠 제작 |
-| `devops-team` | PM, Infra, Security, SRE | 인프라 관리 |
+| `web-dev` | PM, Explorer, Architect, Frontend, Backend, DevOps, QA, Documenter | 웹 서비스 개발 |
+| `general` | PM, Explorer, Developer, Tester | 범용 프로젝트 |
+
+**Coming Soon:**
+- `design-team` - 디자인 프로젝트
+- `data-team` - 데이터/ML 프로젝트
+- `mes-team` - 제조 시스템
+- `content-team` - 콘텐츠 제작
+- `devops-team` - 인프라 관리
 
 ---
 
 ## MCP Tools
 
 ### Team Management
-- `team_list_templates` - 템플릿 목록
-- `team_init` - 팀 초기화
-- `team_get_config` - 설정 조회
-- `team_set_goal` - 프로젝트 목표 설정
+| Tool | 설명 |
+|------|------|
+| `team_list_templates` | 사용 가능한 템플릿 목록 조회 |
+| `team_init` | 프로젝트에 팀 설정 초기화 |
+| `team_get_config` | 현재 팀 설정 조회 |
+| `team_set_goal` | 프로젝트 목표 및 컨텍스트 설정 |
 
-### Workflow
-- `workflow_list` - 워크플로우 목록
-- `workflow_run` - 워크플로우 실행
-- `workflow_status` - 상태 조회
-- `workflow_resume` - 재개
+### Agent Management
+| Tool | 설명 |
+|------|------|
+| `agent_list` | 팀 에이전트 목록 조회 |
+| `agent_add` | 커스텀 에이전트 추가 |
+| `agent_modify` | 에이전트 설정 수정 |
+
+### Workflow Management
+| Tool | 설명 |
+|------|------|
+| `workflow_list` | 워크플로우 목록 조회 |
+| `workflow_run` | 워크플로우 실행 |
+| `workflow_status` | 실행 상태 조회 |
+| `workflow_resume` | 중단된 워크플로우 재개 |
+| `workflow_abort` | 워크플로우 중단 |
 
 ### Monitoring
-- `monitor_register` - 모니터링 등록
-- `monitor_emit` - 이벤트 발행
+| Tool | 설명 |
+|------|------|
+| `monitor_register` | 모니터링 엔드포인트 등록 |
+| `monitor_emit` | 커스텀 이벤트 발행 |
+| `monitor_get_events` | 이벤트 로그 조회 |
+
+---
+
+## MCP Resources
+
+| URI | 설명 |
+|-----|------|
+| `team://config` | 현재 팀 설정 |
+| `team://agents` | 에이전트 목록 |
+| `team://agents/{role}` | 특정 에이전트 상세 |
+| `team://workflows` | 워크플로우 목록 |
+| `team://workflows/{id}` | 특정 워크플로우 상세 |
+
+---
+
+## MCP Prompts
+
+| Prompt | 설명 |
+|--------|------|
+| `pm-analyze` | PM의 태스크 분석 프롬프트 |
+| `pm-plan` | PM의 실행 계획 수립 프롬프트 |
+| `agent-context` | 에이전트 스폰 시 컨텍스트 프롬프트 |
 
 ---
 
@@ -114,22 +174,48 @@ Claude (PM 역할):
 ### Agent Orchestra Monitor
 
 ```typescript
-// 자동 연동
+// SSE 연동
 monitor_register({
   type: 'sse',
   config: { endpoint: 'http://localhost:3006/api/ingest' }
 })
 ```
 
-### 기타 시스템
+### 지원 시스템
 
 | 시스템 | 연동 방식 |
 |--------|----------|
+| Agent Orchestra Monitor | SSE |
 | Grafana | OTLP |
 | Slack | Webhook |
 | Discord | Webhook |
 | Prometheus | /metrics |
-| 커스텀 | Webhook / SSE |
+| 파일 로그 | JSON/JSONL |
+
+---
+
+## 프로젝트 구조
+
+```
+team-orchestrator-mcp/
+├── src/
+│   ├── index.ts              # MCP 서버 진입점
+│   ├── types/                # TypeScript 타입 정의
+│   ├── services/             # 핵심 서비스
+│   │   ├── TeamManager.ts    # 팀 관리
+│   │   ├── ConfigStore.ts    # 설정 저장소
+│   │   └── TemplateLoader.ts # 템플릿 로더
+│   └── tools/                # MCP 도구
+│       ├── teamTools.ts      # 팀 관련 도구
+│       ├── agentTools.ts     # 에이전트 관련 도구
+│       ├── workflowTools.ts  # 워크플로우 관련 도구
+│       └── monitorTools.ts   # 모니터링 관련 도구
+├── templates/                # 팀 템플릿
+│   ├── web-dev/              # 웹 개발팀
+│   └── general/              # 범용팀
+├── docs/                     # 설계 문서
+└── dist/                     # 빌드 결과물
+```
 
 ---
 
@@ -139,17 +225,42 @@ monitor_register({
 - [MCP 인터페이스 설계](docs/01-mcp-interface-design.md)
 - [이벤트 인터페이스](docs/02-event-interface.md)
 - [템플릿 구조](docs/03-template-structure.md)
+- [확장 아이디어](docs/04-additional-features.md)
+
+---
+
+## 개발
+
+```bash
+# 설치
+npm install
+
+# 빌드
+npm run build
+
+# 개발 서버 (ts-node)
+npm run dev
+
+# 빌드 후 실행
+npm start
+```
 
 ---
 
 ## 로드맵
 
 - [x] 설계 문서
-- [ ] MCP 서버 코어
-- [ ] 기본 템플릿 (web-dev, design, general)
-- [ ] Workflow Engine
-- [ ] Agent Orchestra Monitor 연동
+- [x] MCP 서버 코어
+- [x] 팀 관리 도구 (team_*)
+- [x] 에이전트 관리 도구 (agent_*)
+- [x] 워크플로우 도구 (workflow_*)
+- [x] 모니터링 도구 (monitor_*)
+- [x] 기본 템플릿 (web-dev, general)
+- [ ] 워크플로우 엔진 고도화
+- [ ] 이벤트 발행 고도화
+- [ ] 추가 템플릿 (design, data, devops)
 - [ ] 템플릿 레지스트리
+- [ ] npm 배포
 
 ---
 

@@ -1,0 +1,57 @@
+# General Purpose Team Agents
+version: "1.0"
+
+defaults:
+  outputFormat: markdown
+  contextInheritance: true
+
+agents:
+  pm:
+    name: "Project Manager"
+    type: orchestrator
+    description: |
+      프로젝트 매니저. 요청 분석, 태스크 관리,
+      결과 통합을 담당합니다.
+    prompt: prompts/pm.md
+    canSpawn:
+      - explorer
+      - developer
+      - tester
+
+  explorer:
+    name: "Code Explorer"
+    type: Explore
+    description: |
+      코드 탐색 전문가. 코드베이스 분석 및
+      파일 검색을 담당합니다.
+    prompt: prompts/explorer.md
+    tools:
+      - Glob
+      - Grep
+      - Read
+
+  developer:
+    name: "Developer"
+    type: general-purpose
+    description: |
+      개발자. 코드 작성 및 수정을 담당합니다.
+    prompt: prompts/developer.md
+    tools:
+      - Read
+      - Edit
+      - Write
+      - Glob
+      - Grep
+      - Bash
+
+  tester:
+    name: "Tester"
+    type: general-purpose
+    description: |
+      테스터. 코드 검증 및 테스트를 담당합니다.
+    prompt: prompts/tester.md
+    tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash

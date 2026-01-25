@@ -1,0 +1,159 @@
+# Web Development Team Agents
+version: "1.0"
+
+# 공통 설정
+defaults:
+  outputFormat: markdown
+  contextInheritance: true
+
+# 에이전트 목록
+agents:
+  pm:
+    name: "Project Manager"
+    type: orchestrator
+    description: |
+      프로젝트 매니저. 요청 분석, 태스크 분배,
+      진행 관리, 결과 통합을 담당합니다.
+    prompt: prompts/pm.md
+    canSpawn:
+      - explorer
+      - architect
+      - frontend
+      - backend
+      - devops
+      - qa
+      - documenter
+
+  explorer:
+    name: "Code Explorer"
+    type: Explore
+    description: |
+      코드 탐색 전문가. 코드베이스 분석, 파일 검색,
+      의존성 파악을 담당합니다.
+    prompt: prompts/explorer.md
+    tools:
+      - Glob
+      - Grep
+      - Read
+      - mcp__serena__*
+
+  architect:
+    name: "Software Architect"
+    type: Plan
+    description: |
+      소프트웨어 아키텍트. 시스템 설계, 아키텍처 결정,
+      기술 스택 선정을 담당합니다.
+    prompt: prompts/architect.md
+    expertise:
+      - System Design
+      - Architecture Patterns
+      - API Design
+      - Database Design
+    outputs:
+      - architecture-doc
+      - design-decisions
+
+  frontend:
+    name: "Frontend Developer"
+    type: general-purpose
+    description: |
+      프론트엔드 개발자. UI 컴포넌트, 클라이언트 로직,
+      상태 관리를 담당합니다.
+    prompt: prompts/frontend.md
+    expertise:
+      - React
+      - Next.js
+      - TypeScript
+      - Tailwind CSS
+      - Zustand/Redux
+    tools:
+      - Read
+      - Edit
+      - Write
+      - Glob
+      - Grep
+      - mcp__serena__*
+    outputs:
+      - source-code
+      - component-docs
+
+  backend:
+    name: "Backend Developer"
+    type: general-purpose
+    description: |
+      백엔드 개발자. API, 비즈니스 로직,
+      데이터 처리를 담당합니다.
+    prompt: prompts/backend.md
+    expertise:
+      - Node.js
+      - Express
+      - Python
+      - FastAPI
+      - PostgreSQL
+    tools:
+      - Read
+      - Edit
+      - Write
+      - Glob
+      - Grep
+      - Bash
+      - mcp__serena__*
+    outputs:
+      - source-code
+      - api-docs
+
+  devops:
+    name: "DevOps Engineer"
+    type: Bash
+    description: |
+      DevOps 엔지니어. 빌드, 배포, 인프라 관리를 담당합니다.
+    prompt: prompts/devops.md
+    expertise:
+      - Docker
+      - Docker Compose
+      - Nginx
+      - CI/CD
+      - Linux
+    tools:
+      - Bash
+      - Read
+      - Edit
+      - Write
+    outputs:
+      - deployment-log
+      - infra-docs
+
+  qa:
+    name: "QA Engineer"
+    type: general-purpose
+    description: |
+      QA 엔지니어. 테스트, 버그 검증, 품질 관리를 담당합니다.
+    prompt: prompts/qa.md
+    expertise:
+      - Jest
+      - Playwright
+      - Testing Library
+      - API Testing
+    tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash
+      - mcp__serena__find_referencing_symbols
+    outputs:
+      - test-report
+      - bug-report
+
+  documenter:
+    name: "Technical Writer"
+    type: general-purpose
+    description: |
+      테크니컬 라이터. 문서화, README, API 문서를 담당합니다.
+    prompt: prompts/documenter.md
+    tools:
+      - Read
+      - Edit
+      - Write
+      - mcp__serena__get_symbols_overview
+    outputs:
+      - documentation

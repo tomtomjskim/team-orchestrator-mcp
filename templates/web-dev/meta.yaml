@@ -1,0 +1,54 @@
+# Web Development Team Template
+id: web-dev
+name: Web Development Team
+description: |
+  풀스택 웹 개발팀.
+  프론트엔드(React/Next.js), 백엔드(Node/Python),
+  DevOps, QA 역할 포함.
+version: 1.0.0
+author: team-orchestrator
+license: MIT
+
+# 분류
+category: development
+tags:
+  - web
+  - fullstack
+  - typescript
+  - react
+  - nextjs
+
+# 에이전트 목록
+agents:
+  - pm
+  - explorer
+  - architect
+  - frontend
+  - backend
+  - devops
+  - qa
+  - documenter
+
+# 기본 워크플로우
+defaultWorkflow: standard
+
+# 사용 요건
+requirements:
+  tools:
+    - node >= 18
+    - npm >= 9
+  optional:
+    - docker
+    - git
+
+# 권장 프로젝트 유형
+recommendedFor:
+  - SPA/PWA 개발
+  - API 서버 개발
+  - 풀스택 웹 서비스
+  - Next.js 애플리케이션
+
+# 호환성
+compatibility:
+  claudeCode: ">=1.0.0"
+  teamOrchestrator: ">=0.1.0"
