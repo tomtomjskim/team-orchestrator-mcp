@@ -291,3 +291,72 @@ export interface WorkflowRunOutput {
   };
   result?: WorkflowResult;
 }
+
+
+// ============================================
+// Task Event Types (for Agent Monitor Integration)
+// ============================================
+
+export type TaskEventType =
+  | 'task.started'
+  | 'task.progress'
+  | 'task.completed'
+  | 'task.failed';
+
+export type TaskEventStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface TaskStartPayload {
+  taskId?: string; // Optional - will be auto-generated if not provided
+  agentId: string;
+  agentType: string;
+  description: string;
+  parentTaskId?: string;
+  sessionId?: string; // Optional - will use current session if not provided
+  cwd?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface TaskProgressPayload {
+  taskId: string;
+  progress?: number; // 0-100
+  message?: string;
+  phase?: string;
+  details?: Record<string, any>;
+}
+
+export interface TaskCompletePayload {
+  taskId: string;
+  result?: string;
+  summary?: string;
+  filesModified?: string[];
+  tokensUsed?: number;
+}
+
+export interface TaskFailPayload {
+  taskId: string;
+  error: string;
+  errorCode?: string;
+  recoverable?: boolean;
+}
+
+export interface ActiveTask {
+  taskId: string;
+  agentId: string;
+  agentType: string;
+  description: string;
+  status: TaskEventStatus;
+  parentTaskId?: string;
+  sessionId: string;
+  cwd?: string;
+  startTime: string;
+  lastActivity: string;
+  progress?: number;
+  phase?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface TaskListActiveOutput {
+  tasks: ActiveTask[];
+  total: number;
+  byStatus: Record<TaskEventStatus, number>;
+}

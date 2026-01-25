@@ -136,6 +136,16 @@ Claude (PM 역할):
 | `workflow_resume` | 중단된 워크플로우 재개 |
 | `workflow_abort` | 워크플로우 중단 |
 
+### Task Events (Agent Monitor 연동)
+| Tool | 설명 |
+|------|------|
+| `task_start` | 태스크 시작 이벤트 발행 |
+| `task_progress` | 태스크 진행 상황 업데이트 |
+| `task_complete` | 태스크 완료 처리 |
+| `task_fail` | 태스크 실패 처리 |
+| `task_list_active` | 활성 태스크 목록 조회 |
+| `task_get` | 특정 태스크 상세 조회 |
+
 ### Monitoring
 | Tool | 설명 |
 |------|------|
@@ -211,6 +221,55 @@ registry_add({
 
 ### Agent Orchestra Monitor
 
+**Webhook 연동 (권장)**
+
+```typescript
+// Webhook 연동 - 파일 감시 없이 직접 이벤트 전달
+monitor_register({
+  type: 'webhook',
+  config: { 
+    url: 'http://localhost:4500/api/webhook/events'
+  }
+})
+
+// 또는 도커 환경
+monitor_register({
+  type: 'webhook',
+  config: { 
+    url: 'http://agent-monitor:4500/api/webhook/events'
+  }
+})
+```
+
+**Task 이벤트 사용 예시**
+
+```typescript
+// 1. 태스크 시작
+const result = await task_start({
+  agentId: 'agent-123',
+  agentType: 'Developer',
+  description: '로그인 기능 구현',
+  sessionId: 'session-abc'
+});
+
+// 2. 진행 상황 업데이트
+await task_progress({
+  taskId: result.taskId,
+  progress: 50,
+  message: 'API 엔드포인트 구현 완료',
+  phase: 'implementing'
+});
+
+// 3. 완료
+await task_complete({
+  taskId: result.taskId,
+  summary: '로그인/로그아웃 API 구현 완료',
+  filesModified: ['src/auth/login.ts', 'src/auth/logout.ts']
+});
+```
+
+**SSE 연동 (레거시)**
+
 ```typescript
 // SSE 연동
 monitor_register({
@@ -251,7 +310,8 @@ team-orchestrator-mcp/
 │       ├── agentTools.ts     # 에이전트 관련 도구
 │       ├── workflowTools.ts  # 워크플로우 관련 도구
 │       ├── monitorTools.ts   # 모니터링 관련 도구
-│       └── registryTools.ts  # 레지스트리 관련 도구
+│       ├── registryTools.ts  # 레지스트리 관련 도구
+│       └── taskEventTools.ts # Task 이벤트 도구 (Agent Monitor 연동)
 ├── templates/                # 팀 템플릿
 │   ├── web-dev/              # 웹 개발팀
 │   ├── general/              # 범용팀

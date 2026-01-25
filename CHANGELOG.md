@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-01-25
+
+### Added
+
+#### Task Event Tools (Agent Monitor 연동)
+- `task_start` - 태스크 시작 이벤트 발행
+- `task_progress` - 태스크 진행 상황 업데이트
+- `task_complete` - 태스크 완료 처리
+- `task_fail` - 태스크 실패 처리
+- `task_list_active` - 활성 태스크 목록 조회
+- `task_get` - 특정 태스크 상세 조회
+
+#### New Services
+- `TaskEventService` - 활성 태스크 관리 및 이벤트 발생 서비스
+- MCP Webhook 채널을 통한 Agent Monitor 직접 연동 지원
+
+#### Type Definitions
+- `TaskStartPayload`, `TaskProgressPayload`, `TaskCompletePayload`, `TaskFailPayload`
+- `ActiveTask`, `TaskListActiveOutput`, `TaskEventStatus`
+
+---
+
 ## [0.2.0] - 2025-01-25
 
 ### Added

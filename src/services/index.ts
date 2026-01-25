@@ -8,3 +8,4 @@ export * from './TeamManager.js';
 export * from './WorkflowEngine.js';
 export * from './EventEmitter.js';
 export * from './TemplateRegistry.js';
+export * from './TaskEventService.js';
