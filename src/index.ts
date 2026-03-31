@@ -128,6 +128,22 @@ async function main() {
       });
     }
 
+    // Skill resources (MCP_SKILLS auto-discovery ready)
+    resources.push(
+      {
+        uri: 'skill://team-status',
+        name: 'Team Status Check',
+        description: '팀 에이전트 상태와 워크플로우 현황을 확인한다',
+        mimeType: 'text/markdown',
+      },
+      {
+        uri: 'skill://pm-dispatch',
+        name: 'PM Dispatch',
+        description: '복잡한 태스크를 분해하고 에이전트를 병렬/순차로 배치한다',
+        mimeType: 'text/markdown',
+      },
+    );
+
     return { resources };
   });
 
@@ -161,6 +177,61 @@ async function main() {
         throw new Error(`Workflow '${workflowId}' not found`);
       }
       content = workflow;
+    } else if (uri === 'skill://team-status') {
+      return {
+        contents: [{
+          uri,
+          mimeType: 'text/markdown',
+          text: `---
+name: team-status
+description: 팀 에이전트 상태와 워크플로우 현황을 확인한다
+when-to-use: PM 모드 시작 시, 워크플로우 실행 전 팀 상태 확인이 필요할 때
+allowed-tools: [Read, Bash]
+user-invocable: true
+context: fork
+effort: low
+---
+
+# Team Status Check
+
+팀 설정 파일과 에이전트 상태를 확인합니다.
+
+1. Read ~/.claude/team/agents.yaml — 에이전트 목록 확인
+2. Read ~/.claude/teams/jsnwcorp-dev-team/team.json — 팀 레지스트리 확인
+3. Bash ls ~/.claude/team/context/inboxes/ — 대기 중인 메시지 확인
+4. 활성 워크플로우 상태 보고
+`,
+        }],
+      };
+    } else if (uri === 'skill://pm-dispatch') {
+      return {
+        contents: [{
+          uri,
+          mimeType: 'text/markdown',
+          text: `---
+name: pm-dispatch
+description: 복잡한 태스크를 분해하고 에이전트를 병렬/순차로 배치한다
+when-to-use: PM 모드로 복잡한 요청을 처리할 때, 여러 에이전트를 동시에 실행해야 할 때
+allowed-tools: [Read, Bash, Grep, Glob]
+user-invocable: true
+context: fork
+effort: high
+---
+
+# PM Dispatch
+
+Coordinator 패턴에 따라 태스크를 분해하고 에이전트를 배치합니다.
+상세 프로토콜: ~/.claude/team/prompts/coordinator-system.md
+
+## 절차
+1. 요청 분석 → blast-radius 분류 (single_file/single_module/cross_module/cross_service)
+2. 워크플로우 선택 (agents.yaml blast_radius 규칙 기반)
+3. 에이전트 병렬/순차 판단
+4. 모델 라우팅 (haiku/sonnet/opus)
+5. 에이전트 스폰 + 결과 수집
+`,
+        }],
+      };
     } else {
       throw new Error(`Unknown resource: ${uri}`);
     }
