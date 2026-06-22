@@ -28,3 +28,11 @@ ESM TypeScript 기준을 따른다. MCP 도구, 리소스, 워크플로우 로�
 ## Release Notes
 
 이 패키지는 npm 배포를 전제로 하므로 `bin`, `files`, `dist/` 출력이 깨지지 않는지 항상 확인한다.
+
+## Codex Project Guide Adoption
+
+- 전역 개인 지침과 skill은 `/home/ubuntu/.codex/`와 `/home/ubuntu/.agents/`를 사용하며, 이 repo에 vendoring하지 않는다.
+- MCP/tool contract 변경은 `agent-architecture-readiness`, 보안/권한 표면 변경은 `security-reviewer` 또는 `agent-adversarial-review` 관점으로 검토한다.
+- tool schema, provider behavior, subprocess execution, filesystem/network 권한은 backward compatibility와 abuse risk를 함께 확인한다.
+- credentials, local server state, raw tool logs with secrets는 읽거나 wiki/문서에 기록하지 않는다.
+- 완료 보고에는 변경 요약, 실행한 검증, 생략한 검증과 이유, 남은 리스크를 포함한다.
